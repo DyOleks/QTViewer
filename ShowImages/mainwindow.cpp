@@ -6,18 +6,21 @@
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent, Qt::Window),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow), selectedMode(0)
 {
     ui->setupUi(this);
+    scene = new QGraphicsScene(this);
     timer = new QTimer(this);
 
+    //bind timer with a slot to change an image
     connect(timer, SIGNAL(timeout()), this, SLOT(updateImage()));
-
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete scene;
+    delete timer;
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -26,8 +29,9 @@ void MainWindow::on_pushButton_clicked()
     //we want all jpg files, .tiff (not a .tif) and .bmp
     dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                  "",
-                                                 QFileDialog::ShowDirsOnly
-                                                 | QFileDialog::DontResolveSymlinks);
+                                                QFileDialog::ShowDirsOnly
+                                                |QFileDialog::DontResolveSymlinks
+                                                |QFileDialog::DontUseNativeDialog);
 
     QDir directory(dir);
     QStringList images = directory.entryList(QStringList()  << "*.jpg"
@@ -42,7 +46,7 @@ void MainWindow::on_pushButton_clicked()
 
     //show an image at once the folder was selected
     //and do mirroring on current image? (additional Req)
-//  showImage();
+  // showImage();
 }
 
 
@@ -52,12 +56,32 @@ void MainWindow::showImage()
     if (listOfFileNames.empty() == true)
         return;
 
+    QPixmap processedImage;
     image.load(dir + "/" + listOfFileNames.pop());
-    scene = new QGraphicsScene(this);
-    scene->addPixmap(image);
-    scene->setSceneRect(image.rect());
+
+    switch (selectedMode) {
+    case 0: //none
+        processedImage = image;
+        break;
+    case 1: //horizontal
+        processedImage = image.transformed(QTransform().scale(-1, 1));
+        break;
+    case 2: //vertical
+        processedImage = image.transformed(QTransform().scale(1, -1));
+        break;
+    case 3: //both
+        processedImage = image.transformed(QTransform().scale(-1, -1));
+        break;
+    default:
+        break;
+    }
+
+    scene->clear();
+    scene->addPixmap(processedImage);
+    scene->setSceneRect(processedImage.rect());
 
     ui->graphicsView->setScene(scene);
+    scene->update(ui->graphicsView->rect());
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -74,4 +98,14 @@ void MainWindow::updateImage()
 void MainWindow::on_pushButton_3_clicked()
 {
     timer->stop();
+}
+
+void MainWindow::on_comboBox_activated(int index)
+{
+    selectedMode = index;
+}
+
+void MainWindow::on_comboBox_activated(const QString &arg1)
+{
+
 }
