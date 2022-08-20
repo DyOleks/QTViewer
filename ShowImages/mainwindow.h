@@ -2,7 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QVector>
+#include <QStack>
+#include <QGraphicsScene>
 
 
 namespace Ui {
@@ -17,12 +18,23 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private:
+    void showImage();
+
 private slots:
+    void updateImage();
     void on_pushButton_clicked();
+    void on_pushButton_2_clicked();
+
+    void on_pushButton_3_clicked();
 
 private:
     Ui::MainWindow *ui;
-    QVector<QString> listOfFileNames;
+    QStack<QString> listOfFileNames;
+    QGraphicsScene *scene;
+    QPixmap image;
+    QString dir;
+    QTimer *timer;
 };
 
 #endif // MAINWINDOW_H
