@@ -8,7 +8,7 @@
 //!  A ProcessImage class.
 /*!rocess one image p
   The class encapsulates a method to transform an image.
-    The class expects to per thread.
+    The class expects to process one image per thread.
 */
 class ProcessImage : public QThread
 {
