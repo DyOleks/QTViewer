@@ -3,8 +3,9 @@
 
 #include <QMainWindow>
 #include <QStack>
+#include <QStringList>
 #include <QGraphicsScene>
-
+#include "loadfilenamesbckgrnd.h"
 
 namespace Ui {
 class MainWindow;
@@ -21,13 +22,18 @@ public:
 private:
     void showImage();
 
+public slots:
+        void getLoadinglistOfFileNames(QStringList listFileNames);
+
 private slots:
     void updateImage();
     void on_pushButton_clicked();
     void on_pushButton_2_clicked();
     void on_pushButton_3_clicked();
-    void on_comboBox_activated(const QString &arg1);
     void on_comboBox_activated(int index);
+
+signals:
+    void startLoadingFileNamesBackground(QString sPath);
 
 private:
     Ui::MainWindow *ui;
@@ -37,6 +43,8 @@ private:
     QString dir;
     QTimer *timer;
     int selectedMode;
+    LoadFileNamesBckgrnd *loadFileNames;
+    QThread *thread;
 };
 
 #endif // MAINWINDOW_H

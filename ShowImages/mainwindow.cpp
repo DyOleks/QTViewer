@@ -10,10 +10,24 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     scene = new QGraphicsScene(this);
-    timer = new QTimer(this);
 
+    timer = new QTimer(this);
     //bind timer with a slot to change an image
     connect(timer, SIGNAL(timeout()), this, SLOT(updateImage()));
+
+    thread = new QThread(this);
+    connect(this, SIGNAL(destroyed()), thread, SLOT(quit()));
+
+    loadFileNames = new LoadFileNamesBckgrnd();
+    //bind signal (MainWindow) to slot (loadFileNamesBckgrnd) of thread to load file names from folder
+    connect(this, SIGNAL(startLoadingFileNamesBackground(QString )),
+            loadFileNames, SLOT(runLoadingFileNamesBackground(QString)));
+    //bind signal (loadFileNamesBckgrnd) of thread to slot (MainWindow) to return results (file names from folder)
+    connect(loadFileNames, SIGNAL(finishedLoadinglistOfFileNames(QStringList)),
+            this, SLOT(getLoadinglistOfFileNames(QStringList)));
+
+    loadFileNames->moveToThread(thread);
+    thread->start();
 }
 
 MainWindow::~MainWindow()
@@ -21,32 +35,22 @@ MainWindow::~MainWindow()
     delete ui;
     delete scene;
     delete timer;
+    thread->deleteLater();
 }
 
 void MainWindow::on_pushButton_clicked()
 {
-    //assume the directory exists and contains some files (otherwise should be specified in reqs?)
-    //we want all jpg files, .tiff (not a .tif) and .bmp
+    //assume the directory exists and contains some files
     dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                  "",
                                                 QFileDialog::ShowDirsOnly
                                                 |QFileDialog::DontResolveSymlinks
                                                 |QFileDialog::DontUseNativeDialog);
 
-    QDir directory(dir);
-    QStringList images = directory.entryList(QStringList()  << "*.jpg"
-                                                            << "*.tiff"
-                                                            << "*.bmp", QDir::Files);
-    foreach(QString filename, images) {
-        //put all file names into a container
-        //(can be implemented in a separate thread if we have big amount of data)
-        qDebug()<<filename;
-        listOfFileNames.push_back(filename);
-    }
+    emit startLoadingFileNamesBackground(dir);
 
     //show an image at once the folder was selected
     //and do mirroring on current image? (additional Req)
-  // showImage();
 }
 
 
@@ -60,9 +64,6 @@ void MainWindow::showImage()
     image.load(dir + "/" + listOfFileNames.pop());
 
     switch (selectedMode) {
-    case 0: //none
-        processedImage = image;
-        break;
     case 1: //horizontal
         processedImage = image.transformed(QTransform().scale(-1, 1));
         break;
@@ -72,7 +73,11 @@ void MainWindow::showImage()
     case 3: //both
         processedImage = image.transformed(QTransform().scale(-1, -1));
         break;
+
+    case 0: //none
+        [[fallthrough]]; //C++17
     default:
+        processedImage = image;
         break;
     }
 
@@ -82,6 +87,13 @@ void MainWindow::showImage()
 
     ui->graphicsView->setScene(scene);
     scene->update(ui->graphicsView->rect());
+}
+
+void MainWindow::getLoadinglistOfFileNames(QStringList listFileNames)
+{
+    foreach (const QString &str, listFileNames) {
+        listOfFileNames.push_back(str);
+    }
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -105,7 +117,3 @@ void MainWindow::on_comboBox_activated(int index)
     selectedMode = index;
 }
 
-void MainWindow::on_comboBox_activated(const QString &arg1)
-{
-
-}
