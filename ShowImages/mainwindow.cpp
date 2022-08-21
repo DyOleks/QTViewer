@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent) :
     //bind timer with a slot to change an image
     connect(timer, SIGNAL(timeout()), this, SLOT(updateImage()));
 
+
+    //make loading filenames in a separate thread (non-functional requirement RQ_4)
     thread = new QThread(this);
     connect(this, SIGNAL(destroyed()), thread, SLOT(quit()));
 
@@ -40,7 +42,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {
-    //assume the directory exists and contains some files
+    //assume the directory exists and contains some files (is it assumed > Req)
     dir = QFileDialog::getExistingDirectory(this, tr("Open Directory"),
                                                  "",
                                                 QFileDialog::ShowDirsOnly
@@ -50,49 +52,56 @@ void MainWindow::on_pushButton_clicked()
     emit startLoadingFileNamesBackground(dir);
 
     //show an image at once the folder was selected
-    //and do mirroring on current image? (additional Req)
+    //and do mirroring on current image? (additional > Req)
 }
 
 
 void MainWindow::showImage()
 {
-    //show all images in containter then stop (or should be done in cicrle? issue Req)
+    //show all images in containter then stop (or should be done in cicrle > Req)
     if (listOfFileNames.empty() == true)
-        return;
-
-    QPixmap processedImage;
-    image.load(dir + "/" + listOfFileNames.pop());
-
-    switch (selectedMode) {
-    case 1: //horizontal
-        processedImage = image.transformed(QTransform().scale(-1, 1));
-        break;
-    case 2: //vertical
-        processedImage = image.transformed(QTransform().scale(1, -1));
-        break;
-    case 3: //both
-        processedImage = image.transformed(QTransform().scale(-1, -1));
-        break;
-
-    case 0: //none
-        [[fallthrough]]; //C++17
-    default:
-        processedImage = image;
-        break;
+    {
+        //recharge
+        getLoadinglistOfFileNames(listOfFiles);
+        //return;
     }
 
+    QString fullPath = dir + "/" + listOfFileNames.pop();
+
+
+    //make image processing in a separate thread (non-functional requirement RQ_4)
+    ProcessImage threadProcessImage;
+
+    qDebug() << "GUI thread before MyThread start()"
+                << threadProcessImage.currentThreadId();
+
+    threadProcessImage.setMode(selectedMode);
+    threadProcessImage.setImageName(fullPath);
+
+    threadProcessImage.start();
+
+    qDebug() << "GUI thread after start()"
+                << threadProcessImage.currentThreadId();
+
+    threadProcessImage.wait();
+    processedImage = threadProcessImage.getProcessedImage();
+
+
+    //TODO: can be improved
     scene->clear();
     scene->addPixmap(processedImage);
     scene->setSceneRect(processedImage.rect());
 
     ui->graphicsView->setScene(scene);
     scene->update(ui->graphicsView->rect());
+
 }
 
 void MainWindow::getLoadinglistOfFileNames(QStringList listFileNames)
 {
     foreach (const QString &str, listFileNames) {
         listOfFileNames.push_back(str);
+        listOfFiles.push_back(str);
     }
 }
 

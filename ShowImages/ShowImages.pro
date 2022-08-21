@@ -26,11 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    loadfilenamesbckgrnd.cpp
+    loadfilenamesbckgrnd.cpp \
+    processimage.cpp
 
 HEADERS += \
         mainwindow.h \
-    loadfilenamesbckgrnd.h
+    loadfilenamesbckgrnd.h \
+    processimage.h
 
 FORMS += \
         mainwindow.ui

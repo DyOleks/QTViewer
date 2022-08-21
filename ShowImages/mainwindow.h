@@ -6,6 +6,7 @@
 #include <QStringList>
 #include <QGraphicsScene>
 #include "loadfilenamesbckgrnd.h"
+#include "processimage.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,13 +39,16 @@ signals:
 private:
     Ui::MainWindow *ui;
     QStack<QString> listOfFileNames;
+    QStringList listOfFiles; //just keep all file names to fill stack again
     QGraphicsScene *scene;
-    QPixmap image;
+    QPixmap processedImage;
     QString dir;
     QTimer *timer;
     int selectedMode;
     LoadFileNamesBckgrnd *loadFileNames;
     QThread *thread;
+    ProcessImage *processImage;
+    QThread *threadImage;
 };
 
 #endif // MAINWINDOW_H
