@@ -12,7 +12,9 @@ set(CMAKE_AUTORCC TRUE)
 set(CMAKE_AUTOUIC TRUE)
 
 add_executable(ShowImages
+  processimage.cpp
   main.cpp
+  loadfilenamesbckgrnd.cpp
   mainwindow.ui
   mainwindow.cpp
 )

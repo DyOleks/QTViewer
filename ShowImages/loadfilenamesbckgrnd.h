@@ -6,6 +6,12 @@
 #include <QDebug>
 #include <QStringList>
 
+//!  A LoadFileNamesBckgrnd class.
+/*!
+  The class encapsulates a method of all files
+    loading in a folder. Then it emits a signal
+    with the list of file names
+*/
 class LoadFileNamesBckgrnd : public QObject
 {
     Q_OBJECT

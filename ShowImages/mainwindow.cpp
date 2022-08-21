@@ -61,8 +61,7 @@ void MainWindow::showImage()
     //show all images in containter then stop (or should be done in cicrle > Req)
     if (listOfFileNames.empty() == true)
     {
-        //recharge
-        getLoadinglistOfFileNames(listOfFiles);
+        getLoadinglistOfFileNames(listOfFiles);    //reloading, let's look at the pictures from the beginning
         //return;
     }
 
@@ -101,6 +100,8 @@ void MainWindow::getLoadinglistOfFileNames(QStringList listFileNames)
 {
     foreach (const QString &str, listFileNames) {
         listOfFileNames.push_back(str);
+
+        //TODO: temporary solution
         listOfFiles.push_back(str);
     }
 }
