@@ -59,13 +59,13 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::showImage()
 {
     //show all images in containter then stop (or should be done in cicrle > Req)
-    if (listOfFileNames.empty() == true)
+    if (index == 0)
     {
-        getLoadinglistOfFileNames(listOfFiles);    //reloading, let's look at the pictures from the beginning
         //return;
+        index = listOfFiles.count() - 1;    //reloading, let's look at the pictures from the beginning
     }
 
-    QString fullPath = dir + "/" + listOfFileNames.pop();
+    QString fullPath = dir + "/" + listOfFiles.at(index--);
 
 
     //make image processing in a separate thread (non-functional requirement RQ_4)
@@ -99,9 +99,6 @@ void MainWindow::showImage()
 void MainWindow::getLoadinglistOfFileNames(QStringList listFileNames)
 {
     foreach (const QString &str, listFileNames) {
-        listOfFileNames.push_back(str);
-
-        //TODO: temporary solution
         listOfFiles.push_back(str);
     }
 }

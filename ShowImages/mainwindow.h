@@ -38,7 +38,6 @@ signals:
 
 private:
     Ui::MainWindow *ui;
-    QStack<QString> listOfFileNames;
     QStringList listOfFiles; //just keep all file names to fill stack again
     QGraphicsScene *scene;
     QPixmap processedImage;
@@ -49,6 +48,7 @@ private:
     QThread *thread;
     ProcessImage *processImage;
     QThread *threadImage;
+    int index;
 };
 
 #endif // MAINWINDOW_H
